@@ -1,0 +1,70 @@
+<%= form_with(model: cycle) do |form| %>
+  <% if cycle.errors.any? %>
+    <div class="mb-3 row">
+      <div id="error_explanation">
+        <h2><%= pluralize(cycle.errors.count, "error") %> prohibited this cycle from being saved:</h2>
+
+        <ul>
+          <% cycle.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+  <div class="mb-3 row">
+    <%= form.label :name, class: 'col-sm-2 col-form-label' %>
+    <div class="col-sm-9">
+      <%= form.text_field :name, class: 'form-control' %>
+    </div>
+  </div>
+
+  <%= form.label :components, class: 'col-sm-2 col-form-label', style: "font-weight: bold;" %>
+  <%= form.fields_for :components do |component_form| %>
+    <%= render 'component_fields', f: component_form %>
+  <% end %>
+  <%= link_to_add_fields "Add Component", form, :components %>
+
+  <div class="mb-3 row">
+    <div class="col-sm-2"> &nbsp; </div>
+    <div class="col-sm-4">
+      <%= form.submit %>
+    </div>
+  </div>
+<% end %>
+
+<script type="text/javascript">
+  function bindClick(){
+    $(".remove_fields").unbind('click')
+    $(".remove_fields").bind('click',function(event){
+      event.preventDefault();
+      console.log($(this).closest('input[type=hidden]').val());
+      $(this).closest('.component_fields').find(".destroy_field").val('1')
+      $(this).closest('.component_fields').hide()
+    });
+
+    $(".add_fields").unbind('click')
+    $(".add_fields").bind('click', function(event){
+      event.preventDefault();
+      let cloned = $('.component_fields:last').clone()
+      cloned.insertBefore(this).show();
+      cloned.find(":text").val("");
+      $(cloned).closest('.component_fields').find(".destroy_field").val('false')
+
+      let index = $('.component_fields').length;
+      index = index - 1;
+      $('.component_fields:last input.component_name').attr('name', function() {
+          // return `contribution[item_quantity_${items}]`;
+          return `cycle[components_attributes][${index}][name]`
+      });
+
+      $('.component_fields:last input.destroy_field').attr('name', function() {
+          // return `contribution[item_quantity_${items}]`;
+          return `cycle[components_attributes][${index}][_destroy]`
+      });
+      event.preventDefault()
+      bindClick();
+    });
+  }
+  bindClick();
+</script>
